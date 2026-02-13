@@ -17,7 +17,7 @@ provider "digitalocean" {
 
 locals {
   droplet_size_by_memory_gb = {
-    8  = "s-4vcpu-8gb"
+    8  = "c-4"
     16 = "s-4vcpu-16gb"
   }
 
