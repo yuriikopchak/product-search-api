@@ -1,0 +1,43 @@
+do_token            = "dop_v1_xxx"
+ssh_key_fingerprint = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+app_repo_url        = "https://github.com/your-org/product-search-api.git"
+region              = "nyc1"
+
+
+droplet_memory_gb = 8
+
+db_cluster_name = "product-search-db"
+db_version      = "16"
+db_size         = "db-s-1vcpu-1gb"
+db_node_count   = 1
+db_name         = "catalog_db"
+db_user         = "app_user"
+
+app_repo_branch      = "main"
+ssh_private_key_path = "~/.ssh/id_ed25519"
+
+# Bump this value when you want to force re-deploy without infra changes.
+app_deploy_version = "1"
+
+category_ids = {
+  FAUCETS_CATEGORY_ID              = ""
+  VANITIES_CATEGORY_ID             = ""
+  LIGHTINGS_CATEGORY_ID            = ""
+  TILES_CATEGORY_ID                = ""
+  SHOWER_SYSTEMS_CATEGORY_ID       = ""
+  TUBS_CATEGORY_ID                 = ""
+  SHOWER_GLASSES_CATEGORY_ID       = ""
+  MIRRORS_CATEGORY_ID              = ""
+  TOILETS_CATEGORY_ID              = ""
+  PAINTS_CATEGORY_ID               = ""
+  LVPS_CATEGORY_ID                 = ""
+  TUB_FILLERS_CATEGORY_ID          = ""
+  TOWEL_BARS_CATEGORY_ID           = ""
+  WALLPAPERS_CATEGORY_ID           = ""
+  TOILET_PAPER_HOLDERS_CATEGORY_ID = ""
+  ROBE_HOOKS_CATEGORY_ID           = ""
+  TOWEL_RINGS_CATEGORY_ID          = ""
+  TUB_DOORS_CATEGORY_ID            = ""
+  SHELVES_CATEGORY_ID              = ""
+  FLOORING_CATEGORY_ID             = ""
+}
