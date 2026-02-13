@@ -16,6 +16,7 @@ class SearchEngine:
         self.index = index
         self._embedding_cache: OrderedDict[str, np.ndarray] = OrderedDict()
         self._embedding_cache_size = settings.embedding_cache_size
+        self._encode_lock = asyncio.Lock()
         self.model = None
 
     def load_model(self):
@@ -30,17 +31,22 @@ class SearchEngine:
             self._embedding_cache.move_to_end(cache_key)
             return self._embedding_cache[cache_key]
 
-        embedding = await asyncio.to_thread(
-            lambda: self.model.encode([query], normalize_embeddings=True)[0]
-        )
-        embedding = np.array(embedding, dtype=np.float32)
+        async with self._encode_lock:
+            if self._embedding_cache_size > 0 and cache_key in self._embedding_cache:
+                self._embedding_cache.move_to_end(cache_key)
+                return self._embedding_cache[cache_key]
 
-        if self._embedding_cache_size > 0:
-            self._embedding_cache[cache_key] = embedding
-            self._embedding_cache.move_to_end(cache_key)
-            if len(self._embedding_cache) > self._embedding_cache_size:
-                self._embedding_cache.popitem(last=False)
-        return embedding
+            embedding = await asyncio.to_thread(
+                lambda: self.model.encode([query], normalize_embeddings=True)[0]
+            )
+            embedding = np.array(embedding, dtype=np.float32)
+
+            if self._embedding_cache_size > 0:
+                self._embedding_cache[cache_key] = embedding
+                self._embedding_cache.move_to_end(cache_key)
+                if len(self._embedding_cache) > self._embedding_cache_size:
+                    self._embedding_cache.popitem(last=False)
+            return embedding
 
     async def search(
         self,
