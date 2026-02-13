@@ -62,6 +62,13 @@ variable "db_user" {
   default     = "app_user"
 }
 
+variable "db_user_password_override" {
+  description = "Optional password for imported/existing DB user when provider cannot read it"
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
 variable "app_repo_url" {
   description = "Git repository URL with API source code, reachable from the droplet"
   type        = string

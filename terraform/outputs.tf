@@ -34,7 +34,11 @@ output "database_user" {
 }
 
 output "database_password" {
-  value       = digitalocean_database_user.app.password
+  value = coalesce(
+    try(digitalocean_database_user.app.password, null),
+    var.db_user_password_override,
+    ""
+  )
   description = "Application database password"
   sensitive   = true
 }
@@ -43,7 +47,13 @@ output "database_url" {
   value = format(
     "postgresql://%s:%s@%s:%s/%s?sslmode=require",
     digitalocean_database_user.app.name,
-    urlencode(digitalocean_database_user.app.password),
+    urlencode(
+      coalesce(
+        try(digitalocean_database_user.app.password, null),
+        var.db_user_password_override,
+        ""
+      )
+    ),
     digitalocean_database_cluster.postgres.host,
     tostring(digitalocean_database_cluster.postgres.port),
     digitalocean_database_db.app.name

@@ -21,12 +21,18 @@ locals {
     16 = "s-4vcpu-16gb"
   }
 
+  db_password = coalesce(
+    try(digitalocean_database_user.app.password, null),
+    var.db_user_password_override,
+    ""
+  )
+
   db_env_lines = join("\n", [
     "DB_HOST=${digitalocean_database_cluster.postgres.host}",
     "DB_PORT=${tostring(digitalocean_database_cluster.postgres.port)}",
     "DB_NAME=${digitalocean_database_db.app.name}",
     "DB_USER=${digitalocean_database_user.app.name}",
-    "DB_PASSWORD=${digitalocean_database_user.app.password}",
+    "DB_PASSWORD=${local.db_password}",
     "DB_SSLMODE=require",
   ])
 
@@ -115,6 +121,13 @@ resource "null_resource" "deploy_api" {
     deploy_version  = var.app_deploy_version
   }
 
+  lifecycle {
+    precondition {
+      condition     = local.db_password != ""
+      error_message = "Database user password is unknown. Set db_user_password_override or let Terraform create a new DB user."
+    }
+  }
+
   connection {
     type        = "ssh"
     host        = digitalocean_droplet.api.ipv4_address
@@ -125,7 +138,7 @@ resource "null_resource" "deploy_api" {
 
   provisioner "remote-exec" {
     inline = [
-      "set -euxo pipefail",
+      "set -eux",
       "export DEBIAN_FRONTEND=noninteractive",
       "apt-get update",
       "apt-get install -y ca-certificates curl git docker.io",
