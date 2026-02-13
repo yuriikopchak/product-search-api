@@ -144,7 +144,9 @@ def print_worker_projection(
 
 
 async def run(args):
-    database_url = args.database_url or os.getenv("DATABASE_URL") or build_db_url_from_env()
+    database_url = (
+        args.database_url or os.getenv("DATABASE_URL") or build_db_url_from_env()
+    )
     if not database_url:
         raise RuntimeError(
             "DB connection is not set. Pass --database-url, set DATABASE_URL, "

@@ -36,7 +36,9 @@ async def load_all(pool: asyncpg.Pool) -> dict:
             "dimensions": {},
         }
 
-    logger.info("Loaded embeddings: %d products in %d categories", len(rows), len(categories))
+    logger.info(
+        "Loaded embeddings: %d products in %d categories", len(rows), len(categories)
+    )
 
     faucet_rows = await pool.fetch("""
         SELECT product_id,
@@ -171,7 +173,7 @@ async def load_all(pool: asyncpg.Pool) -> dict:
             f = tile["filters"].get(pid, {})
             if f.get("floor"):
                 flooring_ids.append(pid)
-                flooring_embs.append(tile["embeddings"][i:i + 1])
+                flooring_embs.append(tile["embeddings"][i : i + 1])
                 flooring_names.append(tile["names"][i])
 
     if flooring_ids:

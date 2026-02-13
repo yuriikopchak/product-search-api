@@ -11,7 +11,10 @@ def apply_filters(
     for pid, score in results:
         keep = True
 
-        if "holeSpacingCompatibility" in filters and filters["holeSpacingCompatibility"]:
+        if (
+            "holeSpacingCompatibility" in filters
+            and filters["holeSpacingCompatibility"]
+        ):
             f = cat_data["filters"].get(pid, {})
             value = filters["holeSpacingCompatibility"]
             if value == "Single Hole" and not f.get("single_hole"):

@@ -21,7 +21,9 @@ def score_products(
         vs = float(vector_scores[i])
         exact_match = 1.0 if query_lower in names[i] else 0.0
         name_tokens = set(names[i].split())
-        overlap = len(query_tokens & name_tokens) / len(query_tokens) if query_tokens else 0.0
+        overlap = (
+            len(query_tokens & name_tokens) / len(query_tokens) if query_tokens else 0.0
+        )
 
         score = 0.70 * vs + 0.20 * exact_match + 0.10 * overlap
         results.append((pid, score))

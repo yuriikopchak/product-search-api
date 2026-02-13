@@ -19,12 +19,24 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Benchmark API endpoint.")
-    parser.add_argument("--url", required=True, help="Base URL, e.g. http://68.183.101.165")
-    parser.add_argument("--endpoint", default="/faucets", help="Endpoint path, e.g. /faucets")
-    parser.add_argument("--queries-file", required=True, help="Path to .txt or .jsonl queries file")
-    parser.add_argument("--requests", type=int, default=10000, help="Total requests to send")
-    parser.add_argument("--concurrency", type=int, default=20, help="Number of parallel workers")
-    parser.add_argument("--timeout", type=float, default=20.0, help="Per-request timeout (sec)")
+    parser.add_argument(
+        "--url", required=True, help="Base URL, e.g. http://68.183.101.165"
+    )
+    parser.add_argument(
+        "--endpoint", default="/faucets", help="Endpoint path, e.g. /faucets"
+    )
+    parser.add_argument(
+        "--queries-file", required=True, help="Path to .txt or .jsonl queries file"
+    )
+    parser.add_argument(
+        "--requests", type=int, default=10000, help="Total requests to send"
+    )
+    parser.add_argument(
+        "--concurrency", type=int, default=20, help="Number of parallel workers"
+    )
+    parser.add_argument(
+        "--timeout", type=float, default=20.0, help="Per-request timeout (sec)"
+    )
     parser.add_argument("--warmup", type=int, default=100, help="Warmup request count")
     return parser.parse_args()
 
@@ -50,7 +62,9 @@ def load_payloads(path: str) -> list[dict]:
     return payloads
 
 
-def one_call(url: str, payload: dict, timeout: float) -> tuple[bool, float, int, str, str]:
+def one_call(
+    url: str, payload: dict, timeout: float
+) -> tuple[bool, float, int, str, str]:
     body = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(
         url=url,
@@ -68,7 +82,13 @@ def one_call(url: str, payload: dict, timeout: float) -> tuple[bool, float, int,
             return ok, latency, status, "", json.dumps(payload, ensure_ascii=False)
     except urllib.error.HTTPError as e:
         latency = (time.perf_counter() - start) * 1000.0
-        return False, latency, e.code, f"HTTPError: {e.reason}", json.dumps(payload, ensure_ascii=False)
+        return (
+            False,
+            latency,
+            e.code,
+            f"HTTPError: {e.reason}",
+            json.dumps(payload, ensure_ascii=False),
+        )
     except Exception as e:  # noqa: BLE001
         latency = (time.perf_counter() - start) * 1000.0
         return False, latency, 0, str(e), json.dumps(payload, ensure_ascii=False)
@@ -89,7 +109,14 @@ def percentile(values: list[float], p: float) -> float:
     return d0 + d1
 
 
-def run_phase(name: str, target_url: str, payloads: list[dict], total_requests: int, concurrency: int, timeout: float):
+def run_phase(
+    name: str,
+    target_url: str,
+    payloads: list[dict],
+    total_requests: int,
+    concurrency: int,
+    timeout: float,
+):
     latencies: list[float] = []
     ok_count = 0
     fail_count = 0
@@ -98,7 +125,10 @@ def run_phase(name: str, target_url: str, payloads: list[dict], total_requests: 
     stream = itertools.islice(itertools.cycle(payloads), total_requests)
     start = time.perf_counter()
     with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futures = [executor.submit(one_call, target_url, payload, timeout) for payload in stream]
+        futures = [
+            executor.submit(one_call, target_url, payload, timeout)
+            for payload in stream
+        ]
         for fut in as_completed(futures):
             ok, latency, status, err, payload_text = fut.result()
             latencies.append(latency)
@@ -107,7 +137,9 @@ def run_phase(name: str, target_url: str, payloads: list[dict], total_requests: 
             else:
                 fail_count += 1
                 if len(fail_samples) < 10:
-                    fail_samples.append(f"status={status}, err={err}, payload={payload_text}")
+                    fail_samples.append(
+                        f"status={status}, err={err}, payload={payload_text}"
+                    )
 
     elapsed = time.perf_counter() - start
     latencies.sort()
@@ -145,9 +177,18 @@ def main():
     print(f"Payload templates loaded: {len(payloads)}")
 
     if args.warmup > 0:
-        run_phase("Warmup", target_url, payloads, args.warmup, min(args.concurrency, 10), args.timeout)
+        run_phase(
+            "Warmup",
+            target_url,
+            payloads,
+            args.warmup,
+            min(args.concurrency, 10),
+            args.timeout,
+        )
 
-    run_phase("Benchmark", target_url, payloads, args.requests, args.concurrency, args.timeout)
+    run_phase(
+        "Benchmark", target_url, payloads, args.requests, args.concurrency, args.timeout
+    )
 
 
 if __name__ == "__main__":

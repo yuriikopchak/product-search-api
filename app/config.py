@@ -54,8 +54,9 @@ class Settings(BaseSettings):
         missing = [key for key, value in required.items() if not value]
         if missing:
             raise ValueError(
-                "Missing DB settings: " + ", ".join(missing) +
-                ". Set DB_* variables or DATABASE_URL."
+                "Missing DB settings: "
+                + ", ".join(missing)
+                + ". Set DB_* variables or DATABASE_URL."
             )
 
         return (
