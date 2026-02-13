@@ -12,10 +12,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Download model at build time (cached in image)
-RUN python -c "from sentence_transformers import SentenceTransformer; \
-    SentenceTransformer('jinaai/jina-clip-v2', trust_remote_code=True)"
-
 COPY app/ ./app/
 
 EXPOSE 8000
